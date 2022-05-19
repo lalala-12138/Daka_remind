@@ -4,8 +4,6 @@ import time
 import urllib.parse
 import requests
 import warnings
-import os
-qywechat = os.environ.get('qywechat')
 
 warnings.filterwarnings("ignore")
 
@@ -41,7 +39,7 @@ def login():
         jwsession = 'Login failed.'
     print(jwsession)
     burl=urllib.parse.quote(jwsession)
-    dataa="contentType=txt&title=xuan&content={}&updateTime={}".format(burl,str(time.time))
+    dataa="contentType=txt&title={}&content={}&updateTime={}".format(mine,burl,str(time.time))
     requests.post(url="https://api.notelive.cn/server/replaceOrInsertOne", data=dataa, headers= {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'})
     return jwsession
 
