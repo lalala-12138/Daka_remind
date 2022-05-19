@@ -4,12 +4,15 @@ import time
 import urllib.parse
 import requests
 import warnings
+import os
+qywechat = os.environ.get('qywechat')
 
 warnings.filterwarnings("ignore")
 
 def login():
-    username = "18992844695"
-    password = "123456"
+    #此处填管理员的账号密码
+    username = ""
+    password = ""
     loginUrl = "https://gw.wozaixiaoyuan.com/basicinfo/mobile/login/username"
     loginHeader ={
         "Host": "student.wozaixiaoyuan.com",
@@ -48,9 +51,9 @@ def warn():
     dateToday = time.strftime("%Y" + "%m" + "%d")
     timestr = time.strftime("%H")
     #本地测试
-    if 0 <= int(timestr) < 12:
+    # if 0 <= int(timestr) < 12:
     # 云端运行
-    # if 8 <= int(timestr) < 12 or 24 <= int(timestr) < 32:
+    if 8 <= int(timestr)+8 < 12 or 24 <= int(timestr)+8 < 32:
 
         seq = "1"
         name="晨检"
@@ -66,36 +69,47 @@ def warn():
     }
 
     resJson = requests.post(url=warnUrl, headers=headers, data=data, verify=False).json()
+    # print(resJson)
     try:
         count = 0
         list = []
         nameList=[]
-        print("未打卡成员信息如下：")
+        # print("未打卡成员信息如下：")
         for i in resJson["data"]:
-            print(i["name"] + i["phone"].replace("18191647220","15209165722").replace("18402943585","13309222408"))
-            list.append(i["phone"].replace("18191647220","15209165722").replace("18402943585","13309222408"))
+            #此处电话信息来源于我在校园，和企业微信不同可通过.replace()修改
+            # print(i["name"] + i["phone"])
+            list.append(i["phone"])
             nameList.append(i['name'])
             count = count + 1
         text=str(name)+"未打卡人数：" + str(count)
     except:
         text=resJson['message']
-
+        print(text)
     else:
+        print(text)
+        if count !=0:
+            recentBody = {
+                "msgtype": "text",
+                "text": {
+                    "content": text+"\n💫温馨提示: 请尽快打卡",
+                    "mentioned_mobile_list": list
 
-        recentBody = {
-            "msgtype": "text",
-            "text": {
-                "content": text+"\n⭐·请尽快打卡",
-                "mentioned_mobile_list": list
-
+                }
             }
-        }
+            #此处填企业微信机器人api
+            recentUrl = ""
+            requests.post(url=recentUrl, json=recentBody, headers={'Content-Type': 'application/json; charset=UTF-8'}, verify=False)
+        else:
+            print("全部打卡")
 
-        recentUrl = 'https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=51d2886c-9360-4bc9-97ed-af0b21a72edb'
-        requests.post(url=recentUrl, json=recentBody, headers={'Content-Type': 'application/json; charset=UTF-8'}, verify=False)
-
-if __name__ == "__main__":
-    cityUrl = "https://api.notelive.cn/render/xuan"
+# if __name__ == "__main__":
+def handler(event, context):
+    global headers
+    global dayNotice
+    global mine
+    #此处见readme
+    mine=""
+    cityUrl = "https://api.notelive.cn/render/{}".format(mine)
     cityRes = requests.get(cityUrl)
     jwsession = cityRes.text
     url = "https://student.wozaixiaoyuan.com/heat/get15Days.json"
@@ -124,6 +138,7 @@ if __name__ == "__main__":
         }
         dayNotice = requests.get(url=url, headers=headers, json={}, verify=False).json()
     warn()
+    return "运行成功"
 
 
 
