@@ -124,7 +124,7 @@ def handler(event, context):
     else:
         print("##令牌已过期，进入登录流程")
         login()
-        cityUrl = "https://api.notelive.cn/render/xuan"
+        cityUrl = "https://api.notelive.cn/render/{}".format(mine)
         cityRes = requests.get(cityUrl)
         jwsession = cityRes.text
         headers = {
